@@ -42,16 +42,16 @@ export LANG=C.UTF-8
 #   /usr/bin/vim
 
 # SCRIPT DEPENDENCIES:
-#   /mnt/Vancouver/apps/arxiv/sed_characters                                    ## lookup file for character replacement via `sed -i` command on "arxiv-*" files
-#   /mnt/Vancouver/apps/arxiv/arxiv_keywords.txt                                ## lookup file of key words, phrases for `grep` command on "arxiv-filtered" results file
+#   /home/tangchuan/program/arxiv-rss/sed_characters                                    ## lookup file for character replacement via `sed -i` command on "arxiv-*" files
+#   /home/tangchuan/program/arxiv-rss/arxiv_keywords.txt                                ## lookup file of key words, phrases for `grep` command on "arxiv-filtered" results file
 
 # USAGE:
 #   Runs 3 am daily via crontab:
 #   m    h    dom  mon  dow  user        nice          command
 #   0    3    *    *    *    victoria    nice -n 19    /mnt/Vancouver/programming/scripts/arxiv-rss.sh                                         
-#   You can also manually execute (outside of: /mnt/Vancouver/apps/arxiv/) this script.
+#   You can also manually execute (outside of: /home/tangchuan/program/arxiv-rss/) this script.
 
-# Open results files { .../arxiv-filtered | .../arxiv-others } in Vim/Neovim;
+# Open results files  .../arxiv-filtered | .../arxiv-others  in Vim/Neovim;
 # with cursor on URL, "gx" keypress (or: Ctrl-click) opens that link in browser. :-D
 
 # ============================================================================
@@ -60,10 +60,10 @@ export LANG=C.UTF-8
 # Set paths:
 
 # https://stackoverflow.com/questions/793858/how-to-mkdir-only-if-a-dir-does-not-already-exist
-mkdir -p /mnt/Vancouver/apps/arxiv
-mkdir -p /mnt/Vancouver/apps/arxiv/old
+mkdir -p /home/tangchuan/program/arxiv-rss
+mkdir -p /home/tangchuan/program/arxiv-rss/old
 
-cd /mnt/Vancouver/apps/arxiv/
+cd /home/tangchuan/program/arxiv-rss/
 
 cp 2>/dev/null -f .date.penultimate  .date.ante-penultimate                     ## 2>/dev/null : hide errors, warnings
 cp 2>/dev/null -f .date  .date.penultimate                                      ## Not interested in seeing these files, so .hidden
@@ -112,7 +112,8 @@ printf '\ncurrent datetime: %s\n' "$CURR_DATE"
 #   FEED                            RESOLVES (BROWSER) TO
 #   http://arxiv.org/rss/cs.AI      http://export.arxiv.org/rss/cs.AI           ## Artificial Intelligence
 #   http://arxiv.org/rss/cs.CL      http://export.arxiv.org/rss/cs.CL           ## Computation and Language
-#   http://arxiv.org/rss/cs.IR      http://export.arxiv.org/rss/cs.IR           ## Information Retrieval
+#   http://arxiv.org/rss/cs.CV      http://export.arxiv.org/rss/cs.CV           ## CV
+#   http://arxiv.org/rss/cs.CV      http://export.arxiv.org/rss/cs.CG           ## CG
 #   http://arxiv.org/rss/cs.LG      http://export.arxiv.org/rss/cs.LG           ## Machine Learning
 #   http://arxiv.org/rss/stat.ML    http://export.arxiv.org/rss/stat.ML         ## Machine Learning
 
@@ -183,17 +184,32 @@ else
 fi
 
 # ----------------------------------------
-# cs.IR
+# cs.CV
 
 curl -s http://export.arxiv.org/rss/cs.IR > .arxiv-temp
-cs_IR_TIMESTAMP=$(grep -m 1 -E [0-9]{4}-[0-9]{2}-[0-9]{2} .arxiv-temp | date -d - +'%Y-%m-%d')
-cs_IR_TIMESTAMP_INT=$(date -d "${cs_IR_TIMESTAMP}" +"%s")
-printf '\n cs_IR_TIMESTAMP: %s\n' "$cs_IR_TIMESTAMP"
+cs_CV_TIMESTAMP=$(grep -m 1 -E [0-9]{4}-[0-9]{2}-[0-9]{2} .arxiv-temp | date -d - +'%Y-%m-%d')
+cs_CV_TIMESTAMP_INT=$(date -d "${cs_CV_TIMESTAMP}" +"%s")
+printf '\n cs_CV_TIMESTAMP: %s\n' "$cs_CV_TIMESTAMP"
 
-if [[ "$cs_IR_TIMESTAMP_INT" -eq "$OLD_DATE_INT" ]]; then
-  echo 'No new cs.IR (Information Retrieval) RSS feeds.' 2>&1 | tee -a log
+if [[ "$cs_CV_TIMESTAMP_INT" -eq "$OLD_DATE_INT" ]]; then
+  echo 'No new cs.CV (Computer Vision and Pattern Recognition) RSS feeds.' 2>&1 | tee -a log
 else
-  echo 'Retrieving new cs.IR (Information Retrieval) RSS feeds ...' 2>&1 | tee -a log
+  echo 'Retrieving new cs.CV (Computer Vision and Pattern Recognition) RSS feeds ...' 2>&1 | tee -a log
+  cat .arxiv-temp >> .arxiv
+fi
+
+# ----------------------------------------
+# cs.CG
+
+curl -s http://export.arxiv.org/rss/cs.IR > .arxiv-temp
+cs_CG_TIMESTAMP=$(grep -m 1 -E [0-9]{4}-[0-9]{2}-[0-9]{2} .arxiv-temp | date -d - +'%Y-%m-%d')
+cs_CG_TIMESTAMP_INT=$(date -d "${cs_CG_TIMESTAMP}" +"%s")
+printf '\n cs_CG_TIMESTAMP: %s\n' "$cs_CG_TIMESTAMP"
+
+if [[ "$cs_CG_TIMESTAMP_INT" -eq "$OLD_DATE_INT" ]]; then
+  echo 'No new cs.CG (Computational Geometry) RSS feeds.' 2>&1 | tee -a log
+else
+  echo 'Retrieving new cs.CG (Computational Geometry) RSS feeds ...' 2>&1 | tee -a log
   cat .arxiv-temp >> .arxiv
 fi
 
@@ -278,7 +294,7 @@ sleep 1.5
 # ----------------------------------------
 # Check for duplicate results:
 
-cd /mnt/Vancouver/apps/arxiv/
+cd /home/tangchuan/program/arxiv-rss/
 
 # Get most recent date (embedded in file name) among previously-downloaded results in ./old/ directory:
 # ls -t : sort by modification time, newest first
@@ -372,36 +388,36 @@ fi
 # DESKTOP NOTIFICATION OF NEW ARTICLES:
 
 # https://stackoverflow.com/questions/40082346/how-to-check-if-a-file-exists-in-a-shell-script
-# if [ -f arxiv-filtered ] || [ -f arxiv-others ]; then notify-send -i warning -t 0 "New arXiv RSS feeds at" "<span color='#57dafd' font='26px'><a href=\"file:///mnt/Vancouver/apps/arxiv/\">/mnt/Vancouver/apps/arxiv/</a></span>"; fi
+# if [ -f arxiv-filtered ] || [ -f arxiv-others ]; then notify-send -i warning -t 0 "New arXiv RSS feeds at" "<span color='#57dafd' font='26px'><a href=\"file:///home/tangchuan/program/arxiv-rss/\">/home/tangchuan/program/arxiv-rss/</a></span>"; fi
 
 # https://unix.stackexchange.com/questions/47584/in-a-bash-script-using-the-conditional-or-in-an-if-statement
 # https://askubuntu.com/questions/598601/how-to-customize-the-font-style-in-notify-send
 
 # One-liner:
-# if [ -f arxiv-filtered ] || [ -f arxiv-others ]; then notify-send -i "/mnt/Vancouver/programming/scripts/arxiv.png" -t 0 "New arXiv RSS feeds at" "<span color='#57dafd' font='26px'><a href=\"file:///mnt/Vancouver/apps/arxiv/\">/mnt/Vancouver/apps/arxiv/</a></span>"; fi
+# if [ -f arxiv-filtered ] || [ -f arxiv-others ]; then notify-send -i "/mnt/Vancouver/programming/scripts/arxiv.png" -t 0 "New arXiv RSS feeds at" "<span color='#57dafd' font='26px'><a href=\"file:///home/tangchuan/program/arxiv-rss/\">/home/tangchuan/program/arxiv-rss/</a></span>"; fi
 
 # /mnt/Vancouver/programming/scripts/mutt_test.sh
 
 # if [ -f arxiv-filtered ] || [ -f arxiv-others ]; then
 
 # One-liner:
-# if [ -f arxiv-others ]; then sed -i arxiv-* -f sed_characters; mutt -e "set content_type=text/text" -s 'arxiv-others' mail@VictoriasJourney.com -i /mnt/Vancouver/apps/arxiv/arxiv-others; fi
+# if [ -f arxiv-others ]; then sed -i arxiv-* -f sed_characters; mutt -e "set content_type=text/text" -s 'arxiv-others' mail@VictoriasJourney.com -i /home/tangchuan/program/arxiv-rss/arxiv-others; fi
+# 发邮件
+# if [ -f arxiv-filtered ]; then
+#   # Replace HTML, non-unicode characters in titles via external "sed_characters" lookup file:
+#   sed -i arxiv-* -f sed_characters
+#   # Desktop notification, with an arXiv png logo (available at https://persagen.com/files/misc/arxiv.png):
+#   # notify-send -i "/mnt/Vancouver/programming/scripts/arxiv.png" -t 0 "New arXiv RSS feeds at" "<span color='#57dafd' font='26px'><a href=\"file:///home/tangchuan/program/arxiv-rss/\">/home/tangchuan/program/arxiv-rss/</a></span>"
+#   mutt -e "set content_type=text/text" -s 'arxiv-filtered' tangchuan20@mails.jlu.edu.cn -i /home/tangchuan/program/arxiv-rss/arxiv-filtered
+# fi
 
-if [ -f arxiv-filtered ]; then
-  # Replace HTML, non-unicode characters in titles via external "sed_characters" lookup file:
-  sed -i arxiv-* -f sed_characters
-  # Desktop notification, with an arXiv png logo (available at https://persagen.com/files/misc/arxiv.png):
-  # notify-send -i "/mnt/Vancouver/programming/scripts/arxiv.png" -t 0 "New arXiv RSS feeds at" "<span color='#57dafd' font='26px'><a href=\"file:///mnt/Vancouver/apps/arxiv/\">/mnt/Vancouver/apps/arxiv/</a></span>"
-  mutt -e "set content_type=text/text" -s 'arxiv-filtered' mail@VictoriasJourney.com -i /mnt/Vancouver/apps/arxiv/arxiv-filtered
-fi
-
-if [ -f arxiv-others ]; then
-  # Replace HTML, non-unicode characters in titles via external "sed_characters" lookup file:
-  sed -i arxiv-* -f sed_characters
-  # Desktop notification, with an arXiv png logo (available at https://persagen.com/files/misc/arxiv.png):
-  # notify-send -i "/mnt/Vancouver/programming/scripts/arxiv.png" -t 0 "New arXiv RSS feeds at" "<span color='#57dafd' font='26px'><a href=\"file:///mnt/Vancouver/apps/arxiv/\">/mnt/Vancouver/apps/arxiv/</a></span>"
-  mutt -e "set content_type=text/text" -s 'arxiv-others' mail@VictoriasJourney.com -i /mnt/Vancouver/apps/arxiv/arxiv-others
-fi
+# if [ -f arxiv-others ]; then
+#   # Replace HTML, non-unicode characters in titles via external "sed_characters" lookup file:
+#   sed -i arxiv-* -f sed_characters
+#   # Desktop notification, with an arXiv png logo (available at https://persagen.com/files/misc/arxiv.png):
+#   # notify-send -i "/mnt/Vancouver/programming/scripts/arxiv.png" -t 0 "New arXiv RSS feeds at" "<span color='#57dafd' font='26px'><a href=\"file:///home/tangchuan/program/arxiv-rss/\">/home/tangchuan/program/arxiv-rss/</a></span>"
+#   mutt -e "set content_type=text/text" -s 'arxiv-others' tangchuan20@mails.jlu.edu.cn -i /home/tangchuan/program/arxiv-rss/arxiv-others
+# fi
 
 # ----------------------------------------
 # Clean up:
