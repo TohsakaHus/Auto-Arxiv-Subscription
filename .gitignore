@@ -1,0 +1,6 @@
+.arxiv*
+.date*
+log
+arxiv-*
+old
+info.json
