@@ -65,7 +65,7 @@ def send_arxiv_data():
     sendEmail(msg_from, msg_to, passwd, subject, content)
 
 def main():
-    schedule.every().day.at("10:00").do(send_arxiv_data) # 每天在 10:30 时间点运行 job 函数
+    schedule.every().day.at("10:00").do(collect_data) # 每天在 10:30 时间点运行 job 函数
     schedule.every().day.at("10:30").do(send_arxiv_data) # 每天在 10:30 时间点运行 job 函数
     while True:
         schedule.run_pending() # 运行所有可以运行的任务
