@@ -60,9 +60,10 @@ def send_arxiv_data():
     msg_to = dic['msg_to']  #收件人邮箱
 
     subject = "Arxiv-{}".format(datetime.date.today()) # 主题     
-    with open(content_file,'r') as f:
-        content = f.read()
-    sendEmail(msg_from, msg_to, passwd, subject, content)
+    if os.path.exists(content_file):
+        with open(content_file,'r') as f:
+            content = f.read()
+        sendEmail(msg_from, msg_to, passwd, subject, content)
 
 def main():
     schedule.every().day.at("10:00").do(collect_data) # 每天在 10:30 时间点运行 job 函数
