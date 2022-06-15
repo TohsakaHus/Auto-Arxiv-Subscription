@@ -51,6 +51,7 @@ def filter_keywords(dic, keywords):
     """过滤关键词
     """
     # res = [(k, v) for k, v in dic.items() if any(map(lambda y: y.lower() in k.lower(), keywords))]
+    print("Keyword", keywords)
     res = defaultdict(list)
     for k, v in dic.items():
         for w in keywords:
@@ -81,7 +82,6 @@ def main(args):
     dic = get_arxiv_data()
     # 读取keywords进行过滤
     res = filter_keywords(dic, args.keywords)
-    print(res)
     # 发送到Email / 生成微信公众号推送
     if len(res) == 0:
         print("没有新的文章")
