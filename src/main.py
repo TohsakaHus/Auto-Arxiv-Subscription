@@ -55,7 +55,7 @@ def filter_keywords(dic, keywords):
     res = defaultdict(list)
     for k, v in dic.items():
         for w in keywords:
-            if k.lower() == w.lower():
+            if w.lower() in k.lower():
                 res[w].append((k, v))
     return res
 
