@@ -81,6 +81,7 @@ def main(args):
     dic = get_arxiv_data()
     # 读取keywords进行过滤
     res = filter_keywords(dic, args.keywords)
+    print(res)
     # 发送到Email / 生成微信公众号推送
     if len(res) == 0:
         print("没有新的文章")
