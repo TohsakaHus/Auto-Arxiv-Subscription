@@ -18,6 +18,7 @@ import time
 from email import parser
 from email.header import Header
 from email.mime.text import MIMEText
+from collections import defaultdict
 
 import requests
 from bs4 import BeautifulSoup as bs
@@ -49,13 +50,18 @@ def get_arxiv_data():
 def filter_keywords(dic, keywords):
     """过滤关键词
     """
-    res = [(k, v) for k, v in dic.items() if any(map(lambda y: y.lower() in k.lower(), keywords))]
-    return list(res)
+    # res = [(k, v) for k, v in dic.items() if any(map(lambda y: y.lower() in k.lower(), keywords))]
+    res = defaultdict(list)
+    for k, v in dic.items():
+        for w in keywords:
+            if k.lower() == w:
+                res[w].append((k, v))
+    return res
 
 def sendEmail(msg_from, msg_to, auth_id, title, content):
     """发送邮件目前只支持qq邮箱自动发送邮件
     """
-    msg = MIMEText(content)
+    msg = MIMEText(content, _subtype='html', _charset='utf-8')
     msg['Subject'] = title
     msg['From'] = msg_from
     msg['To'] = msg_to
@@ -79,7 +85,28 @@ def main(args):
     if len(res) == 0:
         print("没有新的文章")
     else:
-        content = "\n".join(["{} {}".format(k, v) for k, v in res])
+        # content = "\n".join(["{} {}".format(k, v) for k, v in res])
+        main_html = []
+        for k, v in res.items():
+            paper_html = []
+            for paper, link in v:
+                paper_html.append("""<li>{paper} &nbsp;&nbsp;&nbsp;  <a href={link}>link</a></li>""".format(paper=paper, link=link))
+            paper_html = " ".join(paper_html)
+            res_html = """
+            <h2>{subject}</h2>
+            <ul>
+            {paper_html}
+            </ul>
+            """.format(subject=k, paper_html=paper_html)
+            main_html.append(res_html)
+        main_html = " ".join(main_html)
+
+        today = datetime.date.today().__str__()
+        content = """<h1>{today}</h1>
+        {main_html}
+        """.format(today=today, main_html=main_html)
+        
+        print(content)
         sendEmail(args.email, args.receiver, args.token, args.title, content)
 
 if __name__ == '__main__':
