@@ -12,3 +12,10 @@
 3. 点击Action, 查看workflow是否建立成功, 如果失败可以Re-run
 4. 在邮箱中查看是否收到邮件
 > 每天早七点自动发邮件, 请在[这里](https://github.com/JLUtangchuan/Auto-Arxiv-Subscription/blob/main/.github/workflows/actions.yml#L8)修改更改时间
+
+
+## hot words
+
+```
+3D BEV occupancy instance segmentation point cloud detection Nerf
+```
