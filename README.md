@@ -17,5 +17,5 @@
 ## hot words
 
 ```
-3D BEV occupancy instance segmentation point cloud detection Nerf
+3D BEV occupancy instance segmentation point cloud detection Nerf transform
 ```
