@@ -17,5 +17,5 @@
 ## hot words
 
 ```
-3D BEV occupancy instance segmentation point cloud detection Nerf transform
+3D BEV occupancy instance segment point cloud detect Nerf transform autonomous driving Multi-Camera map lane planning
 ```
